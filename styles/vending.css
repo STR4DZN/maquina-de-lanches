@@ -334,3 +334,12 @@
 .vm-keypad button{font-size:clamp(12px,2vw,16px)}
 
 .vm-tray-item>.vm-delivery-stack{flex:0 0 75px;width:75px}
+/* Named, keyboard-accessible map buttons; never depend on PIXI hit testing. */
+.vm-map-markers{position:fixed;inset:0;pointer-events:none;z-index:20}
+.vm-map-markers[hidden],.vm-map-marker[hidden]{display:none!important}
+.vm-map-marker{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;display:flex;align-items:center;gap:8px;max-width:190px;min-height:38px;padding:6px 11px 6px 7px;background:#fcf6e9;color:#443c30;border:2px solid var(--vm-marker-color,#a13a30);border-radius:9px;box-shadow:0 3px 8px #0005;font:600 12px/1.2 'Segoe UI',sans-serif;cursor:pointer;white-space:nowrap}
+.vm-map-marker svg{width:22px;height:27px;flex-shrink:0;color:var(--vm-marker-color,#a13a30)}
+.vm-map-marker span{overflow:hidden;text-overflow:ellipsis}
+.vm-map-marker:hover{background:#fffdf5;box-shadow:0 3px 12px #0007}
+.vm-map-marker:focus-visible{outline:3px solid #f3d075;outline-offset:3px}
+.vm-map-marker.is-offline{opacity:.65;filter:grayscale(.6)}

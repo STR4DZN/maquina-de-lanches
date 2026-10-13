@@ -9,7 +9,7 @@ export class AreaPlacement {
     if(this.installed)return;this.installed=true;
     Hooks.on("createRegion",(region,options,userId)=>this.capture(region,userId).catch(error=>{this.cancel();ui.notifications.warn(error.message);}));
     Hooks.on("canvasTearDown",()=>this.cancel());
-    Hooks.on("activateTokensLayer",()=>this.cancel());
+    Hooks.on("activateTokenLayer",()=>this.cancel());
     document.addEventListener("keydown",event=>{if(event.key==="Escape")this.cancel();});
   }
   begin(tool="polygon",replaceRegion=null) {

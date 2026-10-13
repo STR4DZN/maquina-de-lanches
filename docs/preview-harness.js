@@ -5,6 +5,7 @@ globalThis.Hooks={on(name,fn){const list=hooks.get(name)||[];list.push(fn);hooks
 class PreviewCollection extends Map { [Symbol.iterator](){return this.values();} }
 class PreviewApplication {
   rendered=false;
+  get state(){return this.rendered?2:0;}
   constructor(){this.element=appHost;}
   async render(){const first=!this.rendered;this.rendered=true;this._replaceHTML(await this._renderHTML(),this.element);if(first)this._onFirstRender?.();return this;}
   async _preClose(){}
@@ -75,7 +76,7 @@ const previewStore=new VendingApp(previewService),previewManager=new VendingMana
 async function activatePreview(kind,{regionId}={}){
   const target=kind==='manager'?previewManager:previewStore;
   if(kind==='manager')assertGM();
-  if(regionId&&regionId!==target.state.regionId){if(!await target.canLeave())return;target.switchMachine(regionId);}
+  if(regionId&&regionId!==target.vmState.regionId){if(!await target.canLeave())return;target.switchMachine(regionId);}
   if(previewApp!==target){previewApp._onClose();previewApp.rendered=false;previewApp.deliveryAnimation?.cancel();previewApp=target;}
   appHost.classList.toggle('is-manager',kind==='manager');await previewApp.render();return previewApp;
 }
@@ -113,7 +114,7 @@ function showMapDrawing(initialTool='polygon'){
   overlay.addEventListener('click',event=>{const action=event.target.dataset.mapAction;if(action==='cancel')cancel();else if(action==='finish')finish();else if(action==='clear'){points=[];redraw();}else if(['rectangle','polygon'].includes(action)){tool=action;points=[];redraw();}});
 }
 await previewApp.render();
-document.getElementById("preview-role").onchange=async event=>{if(!await previewApp.canLeave()){event.target.value=game.user.isGM?"gm":"player";return;}game.user=event.target.value==="gm"?gm:player;document.getElementById("preview-scale").disabled=!game.user.isGM;if(!game.user.isGM){previewManager.state.dirty=false;previewManager.state.areaDirty=false;await activatePreview("store");}else await previewApp.render();};
+document.getElementById("preview-role").onchange=async event=>{if(!await previewApp.canLeave()){event.target.value=game.user.isGM?"gm":"player";return;}game.user=event.target.value==="gm"?gm:player;document.getElementById("preview-scale").disabled=!game.user.isGM;if(!game.user.isGM){previewManager.vmState.dirty=false;previewManager.vmState.areaDirty=false;await activatePreview("store");}else await previewApp.render();};
 document.getElementById("preview-inside").onchange=()=>previewApp.refresh();
 document.getElementById("preview-online").onchange=event=>{gm.active=event.target.checked;previewApp.refresh();};
 document.getElementById("preview-open").onclick=()=>previewApp.render();

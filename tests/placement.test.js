@@ -27,7 +27,7 @@ test("ignora outra cena, outro usuário e região que já é máquina",async()=>
 });
 test("Escape e troca de camada cancelam sem criar máquina",async()=>{
   const e=environment();e.placement.begin();e.keys.get("keydown")({key:"Escape"});await e.placement.capture(e.region(),"gm");assert.equal(e.attached.length,0);
-  e.placement.begin();e.listeners.get("activateTokensLayer")();assert.equal(e.placement.pending,null);
+  e.placement.begin();e.listeners.get("activateTokenLayer")();assert.equal(e.placement.pending,null);
   e.placement.begin();e.listeners.get("canvasTearDown")();assert.equal(e.placement.pending,null);
 });
 test("jogador não pode demarcar; instalação de eventos é única",()=>{

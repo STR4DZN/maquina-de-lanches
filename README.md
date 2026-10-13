@@ -1,17 +1,17 @@
-# Máquina de Lanches — 0.4.1
+# Máquina de Lanches — 0.4.2
 
-Módulo para **Foundry VTT 13**. Uma máquina física com vitrine de produtos, teclado de seleção, compartimento de retirada e entrega imediata. O mestre desenha a área diretamente no mapa e configura os produtos em um painel separado. A identidade visual é independente do HoloSuite.
+Módulo para **Foundry VTT 13**. Uma máquina física com vitrine de produtos, teclado de seleção, compartimento de retirada e entrega imediata. O mestre desenha a área diretamente no mapa e configura os produtos em um painel separado. O acesso fica no grupo próprio **Máquinas de vendas**, na barra de controles do mapa. O módulo funciona de forma independente, sem integração ou dependência do HoloSuite.
 
 **O pagamento continua adiado.** Os preços são informativos. O módulo não consulta nem altera seu módulo de dinheiro e não cria itens na ficha Lancer. Cada retirada gera um recibo persistente vinculado ao jogador, token e ator; “Pegar” recolhe a entrega visual sem descontar estoque novamente.
 
 ## O fluxo no Foundry
 
-1. Abra o mapa como mestre e clique **Demarcar máquina de vendas** nas ferramentas de Tokens ou de Regiões. Também há **Demarcar área** na janela do módulo.
+1. Abra o mapa como mestre e clique no grupo **Máquinas de vendas** (ícone de loja) na barra lateral de controles do mapa. Use **Demarcar máquina por pontos** ou **Demarcar máquina por retângulo**. Os botões de **Usar** e **Gerenciar** também ficam nesse grupo.
 2. O módulo ativa o **polígono nativo das Regiões** e desmarca regiões anteriores. Clique para adicionar os pontos da área e dê duplo clique para finalizar. Se preferir, mude para a ferramenta nativa de **Retângulo** e arraste. Escape cancela a vinculação.
-3. Assim que uma nova região sua for criada na mesma cena, o módulo vincula a máquina e abre a configuração. Não é necessário digitar coordenadas.
+3. Assim que uma nova região sua for criada na mesma cena, o módulo vincula a máquina, retorna à camada de máquinas e abre a configuração. Não é necessário digitar coordenadas.
 4. Em **Produtos**, adicione produtos e configure imagem, nome, categoria, descrição, quantidade, capacidade máxima, preço, chance do sorteio e visibilidade. Salve.
 5. Em **Aparência e opções**, escolha uma paleta ou personalize corpo, painel, faixa superior e detalhes. A prévia muda imediatamente; salve para aplicar aos jogadores. Em **Área no mapa**, localize, mova, ajuste escala/elevação ou redesenhe a região da mesma máquina, preservando catálogo, estoque e histórico.
-6. O jogador move um token que controla para dentro da região. O centro do token, respeitando a elevação, precisa estar dentro da área. O jogador abre a máquina pelo marcador no mapa, botão de loja nas ferramentas de Tokens ou launcher HoloSuite, quando instalado.
+6. O jogador move um token que controla para dentro da região. O centro do token, respeitando a elevação, precisa estar dentro da área. O jogador abre a máquina pelo marcador com nome no mapa ou pelo botão **Usar máquina de vendas** no grupo próprio. O marcador acompanha o pan e zoom. Para o mestre, o botão direito do marcador abre o gerenciamento. Enter e espaço também ativam o marcador.
 7. O jogador seleciona o produto pela vitrine ou pelo código, escolhe a quantidade e clica **Retirar lanche**. O lanche aparece no compartimento após a confirmação; **Pegar** libera o compartimento. **Escolha por mim** sorteia uma unidade entre os produtos disponíveis.
 
 Você também pode selecionar uma região já desenhada e vinculá-la quando a cena ainda não possui máquinas. A API oferece `attach(region)` para regiões existentes e `drawArea("polygon")` ou `drawArea("rectangle")` para iniciar uma demarcação.
@@ -65,7 +65,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\Instalar-Maquina-de-Lanche
 
 O instalador é local, sem downloads, sem administrador e sem alterar permanentemente a política do PowerShell. Seu payload foi verificado contra os arquivos-fonte; a execução do PowerShell no Windows ainda precisa de validação real.
 
-Para instalação manual, extraia a pasta `holosuite-vending` do arquivo `maquina-de-lanches-source.tar.gz` para `Data/modules`. O ID técnico original é preservado para manter compatibilidade e dados da primeira versão. HoloSuite Core é opcional e usado apenas para acesso pelo launcher.
+Para instalação manual, extraia a pasta `holosuite-vending` do arquivo `maquina-de-lanches-source.tar.gz` para `Data/modules`. O ID técnico original é preservado para manter compatibilidade e dados da primeira versão. Não há registro de aplicativos no HoloSuite nem dependência dele. Depois de atualizar, recarregue a página com F5 para remover os registros antigos da sessão.
 
 ## Prévia
 
@@ -93,17 +93,18 @@ python3 docs/build-preview.py
 python3 docs/build-deliverables.py
 ```
 
-Para os testes de interface, instale Playwright (`npm install --no-save playwright`), seu Chromium (`npx playwright install chromium`) e rode `node docs/test-preview.mjs`  , `node docs/test-manager.mjs` e `node docs/test-scale-motion.mjs` e `node docs/test-random-category.mjs`. `HV_CHROMIUM_PATH` permite usar um Chromium já instalado.
+Para os testes de interface, instale Playwright (`npm install --no-save playwright`), seu Chromium (`npx playwright install chromium`) e rode `node docs/test-preview.mjs`  , `node docs/test-manager.mjs` e `node docs/test-scale-motion.mjs` e `node docs/test-random-category.mjs` e `node docs/test-foundry-integration.mjs`. `HV_CHROMIUM_PATH` permite usar um Chromium já instalado.
 
 ## Validação
 
 - **50 testes Node:** catálogo, sorteio, estoque, idempotência, revisão, permissões, origem da identidade, pausa, posição, falhas de persistência/confirmação, demarcação nativa e cancelamento.
-- **68 cenários Chromium (29 da máquina, 18 do gerenciamento, 13 de escala e 8 de sorteio):** vitrine sem molas, seleção por clique/código, código inválido, quantidade, entrega sem animação, cliques repetidos, recolher sem novo desconto, sorteio, filtros, edição/conflito, reposição, paginação, temas, fechar durante solicitação, redução de movimento, estoque independente, desenho por pontos/retângulo e cancelamento.
+- **68 cenários Chromium da interface (29 da máquina, 18 do gerenciamento, 13 de escala e 8 de sorteio):** vitrine sem molas, seleção por clique/código, código inválido, quantidade, entrega sem animação, cliques repetidos, recolher sem novo desconto, sorteio, filtros, edição/conflito, reposição, paginação, temas, fechar durante solicitação, redução de movimento, estoque independente, desenho por pontos/retângulo e cancelamento.
+- **13 cenários Chromium de integração:** importam o ponto de entrada ES real com contratos simulados do Foundry 13 (ApplicationV2 com propriedades somente leitura, grupos de controle e camadas). Cobrem abertura pelos botões, retirada pelo serviço, clique/teclado/botão direito no marcador, pan/zoom, alternância de visibilidade, desenho, cancelamento e permissões.
 - Os testes de concorrência liberam exatamente uma unidade para 200 tentativas simultâneas no motor e para 100 no serviço com documentos simulados.
 - Testes adicionais cobrem enquadramento persistente, links e páginas com imagem, cancelamento durante upload, paletas e HEX, geometria com furos, assinatura de área, gravação atômica de catálogo/área e limpeza do desenho temporário.
 - Telas de máquina, produtos, cores, recorte, área e entrega foram inspecionadas visualmente. Sem exceções JavaScript nos cenários testados.
 
-**Pendências reais:** instalação em Foundry 13/Windows, geometrias e elevação do canvas real, FilePicker, marcadores PIXI, chat privado com vários clientes, versão instalada do HoloSuite e desconexão/troca de mestre durante operações. O repositório público é `STR4DZN/maquina-de-lanches`. A instalação pela URL depende dos assets da release, gerados pelo workflow após validação. Não há campo `verified` sem teste real. Integração monetária permanece adiada.
+**Pendências reais:** instalação em Foundry 13/Windows, geometrias e elevação do canvas real, FilePicker, marcadores DOM sobre o canvas, chat privado com vários clientes e desconexão/troca de mestre durante operações. O repositório público é `STR4DZN/maquina-de-lanches`. A instalação pela URL depende dos assets da release, gerados pelo workflow após validação. Não há campo `verified` sem teste real. Integração monetária permanece adiada.
 
 ## Publicação no GitHub
 
@@ -111,7 +112,7 @@ Repositório público: [STR4DZN/maquina-de-lanches](https://github.com/STR4DZN/m
 
 Manifesto de instalação/atualização para Foundry 13: `https://github.com/STR4DZN/maquina-de-lanches/releases/latest/download/module.json`. Em Configuração → Módulos → Instalar módulo, cole a URL no campo URL do Manifesto. O download é fixo por versão.
 
-- `module.json` usa manifesto de atualização em `releases/latest/download/module.json` e download fixo da versão em `releases/download/v0.4.1/module.zip`.
+- `module.json` usa manifesto de atualização em `releases/latest/download/module.json` e download fixo da versão em `releases/download/v0.4.2/module.zip`.
 - `python3 docs/build-release.py` cria `dist/module.zip`, `dist/module.json`, notas e checksums. O ZIP é o formato usado pelo Foundry para instalação automática.
 - O workflow de release roda os testes e publica tag/asset quando `module.json` é enviado à branch `main` com uma versão inédita. Também pode ser iniciado manualmente em Actions. Releases existentes são preservadas.
 - Para versões futuras, atualize versão, download e changelog antes de enviar à main. O builder ajusta URLs para o repositório do workflow.

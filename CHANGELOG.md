@@ -1,5 +1,16 @@
 # Histórico de versões
 
+## 0.4.2
+
+- Corrige a abertura das duas janelas: o estado da máquina deixa de sobrescrever a propriedade `state`, somente leitura no ApplicationV2 do Foundry 13.
+- Remove os registros e a dependência opcional do HoloSuite.
+- Grupo e camada próprios de Máquinas de vendas nos controles do mapa, sem inserir ferramentas em Tokens ou Regiões.
+- Botões de uso, gerenciamento, polígono, retângulo e visibilidade dos marcadores.
+- Marcador com ícone de máquina e nome, clique/teclado para usar e botão direito para gerenciar.
+- Marcadores acompanham pan/zoom, ficam ocultos durante o desenho e respeitam a presença do token dos jogadores.
+- Concluir uma área retorna à camada de máquinas; Escape ou mudar para Tokens cancela o vínculo pendente.
+- 50 testes Node, 68 cenários de interface e 13 de integração com o ponto de entrada ES real e contratos simulados do Foundry 13.
+
 ## 0.4.1
 
 - Remove as animações de queda e recolhimento; a entrega aparece após confirmar o estoque.

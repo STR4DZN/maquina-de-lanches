@@ -6,7 +6,7 @@ DEST.mkdir(exist_ok=True)
 files=[ROOT/'module.json',ROOT/'README.md',ROOT/'LICENSE',ROOT/'CHANGELOG.md']+sorted((ROOT/'scripts').glob('*.js'))+sorted((ROOT/'styles').glob('*.css'))
 payload=[{'path':str(p.relative_to(ROOT)),'content':base64.b64encode(p.read_bytes()).decode()} for p in files]
 encoded=base64.b64encode(json.dumps(payload,separators=(',',':')).encode()).decode()
-ps=r'''# Máquina de Lanches 0.4.1 - instalador local, sem rede e sem administrador.
+ps=r'''# Máquina de Lanches 0.4.2 - instalador local, sem rede e sem administrador.
 param([string]$FoundryDataPath)
 $ErrorActionPreference = 'Stop'
 try {

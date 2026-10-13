@@ -24,3 +24,4 @@ jobs:
       - run: node docs/test-manager.mjs
       - run: node docs/test-scale-motion.mjs
       - run: node docs/test-random-category.mjs
+      - run: node docs/test-foundry-integration.mjs
