@@ -1,0 +1,9 @@
+node_modules/
+dist/
+__pycache__/
+*.pyc
+playwright-report/
+test-results/
+
+Maquina-de-Lanches-Preview.html
+Gerenciamento-Mestre-Preview.html

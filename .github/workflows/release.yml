@@ -1,0 +1,44 @@
+name: Publish Foundry release
+on:
+  push:
+    branches: [main]
+    paths: ['module.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: foundry-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm test
+      - run: npm run check
+      - run: python3 docs/build-preview.py
+      - run: python3 docs/build-release.py --repository "$GITHUB_REPOSITORY"
+      - run: npm install --no-save --package-lock=false playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node docs/test-preview.mjs
+      - run: node docs/test-manager.mjs
+      - run: node docs/test-scale-motion.mjs
+      - run: node docs/test-random-category.mjs
+      - name: Create tag and publish immutable release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(node -p "JSON.parse(require('fs').readFileSync('module.json')).version")
+          tag="v$version"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release already exists: $tag. Bump module.json version for a new release."
+            exit 0
+          fi
+          gh release create "$tag" dist/module.json dist/module.zip dist/SHA256SUMS.txt \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Máquina de Lanches $version" --notes-file dist/release-notes.md --latest
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url,tagName,assets

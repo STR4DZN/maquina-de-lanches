@@ -1,0 +1,26 @@
+name: Validate module
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm test
+      - run: npm run check
+      - run: python3 docs/build-preview.py
+      - run: python3 docs/build-release.py --repository "$GITHUB_REPOSITORY"
+      - run: npm install --no-save --package-lock=false playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node docs/test-preview.mjs
+      - run: node docs/test-manager.mjs
+      - run: node docs/test-scale-motion.mjs
+      - run: node docs/test-random-category.mjs
