@@ -24,4 +24,11 @@ jobs:
       - run: node docs/test-manager.mjs
       - run: node docs/test-scale-motion.mjs
       - run: node docs/test-random-category.mjs
+      - uses: actions/checkout@v4
+        with:
+          repository: STR4DZN/holosuite-mana
+          ref: v2.3.0
+          path: .integration/bank
       - run: node docs/test-foundry-integration.mjs
+        env:
+          BANK_SOURCE: ${{ github.workspace }}/.integration/bank

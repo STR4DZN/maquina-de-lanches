@@ -1,5 +1,16 @@
 # Histórico de versões
 
+## 0.5.0
+
+- Duplo clique na área nativa abre a máquina, sem exigir token.
+- Contornos coloridos simples; remove marcadores com ícone/nome e a aba de máquinas.
+- Criar e configurar pelos controles de Regiões; Shift + duplo clique edita para o mestre.
+- Compras integradas ao saldo compartilhado do Banco de Mana 2.3.0.
+- Preços inteiros e validação autoritativa; estoque e recibo na mesma atualização.
+- Reserva persistente e recuperação idempotente, incluindo resposta perdida e sorteio preservado.
+- Uma mensagem financeira do banco por compra paga; sem débito duplicado ao pegar.
+- 46 testes Node, 68 cenários Chromium de interface e 12 de integração com três clientes.
+
 ## 0.4.2
 
 - Corrige a abertura das duas janelas: o estado da máquina deixa de sobrescrever a propriedade `state`, somente leitura no ApplicationV2 do Foundry 13.

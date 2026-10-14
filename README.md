@@ -1,119 +1,104 @@
-# Máquina de Lanches — 0.4.2
+# Máquina de Lanches — 0.5.0
 
-Módulo para **Foundry VTT 13**. Uma máquina física com vitrine de produtos, teclado de seleção, compartimento de retirada e entrega imediata. O mestre desenha a área diretamente no mapa e configura os produtos em um painel separado. O acesso fica no grupo próprio **Máquinas de vendas**, na barra de controles do mapa. O módulo funciona de forma independente, sem integração ou dependência do HoloSuite.
+Módulo para **Foundry VTT 13**. O mestre marca uma área no mapa, configura a máquina e os jogadores dão **duplo clique na área** para comprar usando o saldo compartilhado do **Banco de Mana**. O mapa mostra somente contornos coloridos, sem marcadores com ícones ou nomes e sem criar uma aba de máquinas nos controles.
 
-**O pagamento continua adiado.** Os preços são informativos. O módulo não consulta nem altera seu módulo de dinheiro e não cria itens na ficha Lancer. Cada retirada gera um recibo persistente vinculado ao jogador, token e ator; “Pegar” recolhe a entrega visual sem descontar estoque novamente.
+## Instalar ou atualizar
 
-## O fluxo no Foundry
+Em **Instalar módulo → URL do Manifesto**, use:
 
-1. Abra o mapa como mestre e clique no grupo **Máquinas de vendas** (ícone de loja) na barra lateral de controles do mapa. Use **Demarcar máquina por pontos** ou **Demarcar máquina por retângulo**. Os botões de **Usar** e **Gerenciar** também ficam nesse grupo.
-2. O módulo ativa o **polígono nativo das Regiões** e desmarca regiões anteriores. Clique para adicionar os pontos da área e dê duplo clique para finalizar. Se preferir, mude para a ferramenta nativa de **Retângulo** e arraste. Escape cancela a vinculação.
-3. Assim que uma nova região sua for criada na mesma cena, o módulo vincula a máquina, retorna à camada de máquinas e abre a configuração. Não é necessário digitar coordenadas.
-4. Em **Produtos**, adicione produtos e configure imagem, nome, categoria, descrição, quantidade, capacidade máxima, preço, chance do sorteio e visibilidade. Salve.
-5. Em **Aparência e opções**, escolha uma paleta ou personalize corpo, painel, faixa superior e detalhes. A prévia muda imediatamente; salve para aplicar aos jogadores. Em **Área no mapa**, localize, mova, ajuste escala/elevação ou redesenhe a região da mesma máquina, preservando catálogo, estoque e histórico.
-6. O jogador move um token que controla para dentro da região. O centro do token, respeitando a elevação, precisa estar dentro da área. O jogador abre a máquina pelo marcador com nome no mapa ou pelo botão **Usar máquina de vendas** no grupo próprio. O marcador acompanha o pan e zoom. Para o mestre, o botão direito do marcador abre o gerenciamento. Enter e espaço também ativam o marcador.
-7. O jogador seleciona o produto pela vitrine ou pelo código, escolhe a quantidade e clica **Retirar lanche**. O lanche aparece no compartimento após a confirmação; **Pegar** libera o compartimento. **Escolha por mim** sorteia uma unidade entre os produtos disponíveis.
+```text
+https://github.com/STR4DZN/maquina-de-lanches/releases/latest/download/module.json
+```
 
-Você também pode selecionar uma região já desenhada e vinculá-la quando a cena ainda não possui máquinas. A API oferece `attach(region)` para regiões existentes e `drawArea("polygon")` ou `drawArea("rectangle")` para iniciar uma demarcação.
+Para pagamentos, instale e ative também **Banco de Mana 2.3.0 ou posterior**:
 
-## Vitrine e seleção
+```text
+https://github.com/STR4DZN/holosuite-mana/releases/latest/download/module.json
+```
 
-- A vitrine mostra nove produtos por vez. Produtos adicionais ficam em vitrines paginadas, mantendo seus códigos.
-- A1, A2, A3, B1… são determinados pela ordem do catálogo. Há teclado que acompanha a vitrine e 1/2/3 e um campo para códigos de outras fileiras.
-- A seleção destaca o produto e mostra nome, código, quantidade disponível e preço no visor.
-- Há busca por nome, categoria ou código, filtro por categoria e salto direto à vitrine desejada. Catálogos com até 200 produtos usam no máximo 23 vitrines. O preço não é cobrado nesta versão.
-- O editor de imagem aceita arquivos do computador (até 20 MB), caminhos do Foundry, URLs HTTP/HTTPS diretas, links de pesquisa que contenham a imagem e páginas públicas que exponham imagem em metadados e permitam leitura. Sites protegidos, links de mensagens do Discord e páginas com restrições podem exigir link direto ou upload. GIFs permanecem animados.
-- Arraste a imagem, use a roda do mouse ou o controle de zoom (25%–600%), gire, escolha imagem inteira/preencher ou remova. O enquadramento proporcional é compartilhado entre catálogo, vitrine e entrega. Cancelar preserva a imagem anterior; o upload acontece somente ao aplicar, e o produto só muda para jogadores depois de salvar.
-- As ilustrações padrão são placeholders em SVG para produtos sem imagem. O mestre pode substituí-las por qualquer imagem de produto acessível ao Foundry.
-- Produtos desativados não aparecem. Produtos esgotados podem ser vistos, mas não retirados nem sorteados.
-- A entrega aparece imediatamente após o estoque e o recibo serem gravados. Retiradas com várias unidades mostram uma pilha estática de até quatro lanches e a quantidade exata. Pegar recolhe imediatamente, sem animação ou novo desconto. Fechar a janela preserva o recibo e a entrega.
-- A entrega e o recolhimento não usam animações. A preferência de redução de movimento também reduz os efeitos restantes de seleção e interface. Não há animações contínuas enquanto a máquina está ociosa.
-- Temas claro/escuro são individuais; a aparência física da máquina é preservada nos dois.
+Ative os dois módulos no mundo e recarregue todos os clientes com **F5**. O ID técnico `holosuite-vending` foi preservado para manter máquinas, produtos e estoques existentes. O manifesto não impõe dependências: a máquina pode abrir sem o banco, mas compras ficam bloqueadas até existir uma API de pagamentos compatível. Não há app de máquina no HoloSuite; o banco continua disponível pelo celular.
 
-## Configuração, estoque e histórico
+## Marcar, configurar e usar
 
-Cada máquina tem estoque independente e compartilhado entre jogadores. **Completar todos os estoques** completa a capacidade dos produtos. Quantidades também podem ser ajustadas diretamente no editor, com atalhos −1, +1 e completar. Há busca no catálogo, duplicação, reordenação e campos para categoria, descrição, preço informativo e peso do sorteio. Há limite de 200 produtos por máquina e máximo por retirada configurável de 1 a 100 unidades. Sorteios liberam uma unidade. Eles usam apenas a categoria selecionada; “Todos” inclui o catálogo inteiro. Esgotar a categoria desativa o botão, sem buscar produtos de outras categorias. A categoria permanece selecionada depois de retirar. A fonte aleatória usa Web Crypto quando disponível, com uma nova amostra por pedido; não existe regra para impedir repetições. Novas máquinas usam chances iguais, e o mestre pode configurar pesos ou chances proporcionais ao estoque. Mana é o nome padrão da moeda; o rótulo antigo cr é convertido na interface e na próxima gravação da máquina.
+1. Como mestre, abra os controles nativos de **Regiões** do mapa. Clique em **Criar máquina de vendas (retângulo)** e arraste a área; ou escolha **Criar máquina de vendas (polígono)** e marque os pontos. Duplo clique conclui o polígono. **Escape** cancela a vinculação.
+2. Ao concluir, a região vira uma máquina, o Foundry volta à camada de Tokens e abre o gerenciamento.
+3. Em **Produtos**, configure imagem, nome, categoria, quantidade, capacidade, preço em mana e opções de sorteio. Salve.
+4. Em **Aparência e opções**, escolha a cor da máquina e demais opções. Em **Área no mapa**, localize, mova, redimensione ou redesenhe a mesma região. Catálogo e histórico são preservados. A cor da região define seu contorno no mapa.
+5. O jogador dá **duplo clique dentro da área**, escolhe produto e quantidade e clica em **Comprar lanche**. Não exige token nem posição de personagem. É preciso estar na cena da máquina e ter um mestre conectado. Sessão pausada impede compras dos jogadores.
+6. **Escolha por mim** sorteia uma unidade somente na categoria selecionada. O preço do sorteio é definido pelo mestre. **Pegar** apenas libera o compartimento de uma compra já confirmada, sem outro débito ou desconto de estoque.
 
-| Sorteio | Distribuição |
+Para editar depois, o mestre usa **Shift + duplo clique** na área ou seleciona a região e clica em **Configurar máquina da região selecionada**, em Regiões. Esse botão também vincula uma máquina a uma região comum já desenhada. Na camada de Regiões, o duplo clique sem Shift mantém a edição nativa. Não há botões de máquinas na camada de Tokens.
+
+Os contornos acompanham movimento e zoom do mapa. O ponto do clique é testado pela região nativa, incluindo formatos e furos; quando áreas se sobrepõem, a menor tem prioridade. Cliques fora delas continuam disponíveis para o mapa.
+
+## Produtos, imagens e estoque
+
+A máquina tem vitrine, seleção por clique ou código e compartimento de entrega imediata, sem animação de queda ou coleta. Suporta até **200 produtos** com vitrines de nove produtos, busca, filtros, paginação e códigos de duas letras para catálogos maiores. O máximo por compra é configurável entre 1 e 100 unidades; o sorteio entrega uma unidade.
+
+Cada máquina tem estoque próprio, compartilhado pelos jogadores. O mestre pode ajustar quantidade e capacidade, usar −1 / +1 / completar, completar todos os estoques, duplicar e reordenar produtos. Uma edição obsoleta não sobrescreve vendas recentes; o rascunho é mantido para recarregar e revisar.
+
+O editor de imagem aceita arquivo, caminho do Foundry e URL de imagem, com zoom pela roda do mouse, arraste, rotação e enquadramento persistente. Páginas com imagem reconhecível podem ser resolvidas quando o navegador permite; links bloqueados precisam de imagem direta ou arquivo. Cancelar não envia nem aplica a edição. As cores do corpo, painel, faixa e detalhes podem ser ajustadas pelo mestre, com prévia antes de salvar.
+
+Catálogos podem ser exportados e importados em JSON. Importar substitui o catálogo do rascunho e exige salvar; o histórico é preservado.
+
+## Sorteio por categoria
+
+Produtos esgotados ou ocultos nunca entram no sorteio. **Doces** usa somente doces; **Todos** inclui todas as categorias disponíveis. A categoria permanece após comprar e, se esgotar, o botão fica indisponível. Repetições são possíveis em um sorteio aleatório; Web Crypto fornece uma nova amostra por pedido.
+
+| Modo | Distribuição |
 | --- | --- |
-| Chances iguais | Cada produto disponível tem a mesma chance. |
-| Pesos personalizados | A chance é proporcional ao peso. Peso zero exclui o produto. |
-| Proporcional ao estoque | Uma unidade entre todas as unidades disponíveis é sorteada. |
+| Chances iguais | Mesma chance por produto disponível. |
+| Pesos personalizados | Chance proporcional ao peso; peso zero exclui. |
+| Proporcional ao estoque | Chance proporcional às unidades disponíveis. |
 
-Estoque e recibo são gravados juntos na região em uma única atualização. As solicitações são validadas no cliente do mestre responsável, usando o usuário atribuído pelo Foundry à operação. Retiradas, reposições e edições passam pela mesma fila por máquina. Solicitações duplicadas não retiram a mesma unidade duas vezes.
+## Pagamento e recuperação
 
-Uma edição que ficar obsoleta por causa de outra alteração ou retirada não pode sobrescrever o estoque; o rascunho permanece aberto e é possível recarregar os dados. Cancelar a confirmação de descarte mantém o rascunho. Confirmar o descarte retorna aos dados salvos.
+Preços de produtos e sorteios são **quantidades inteiras de mana**. O mestre responsável calcula o preço a partir do catálogo real, confere quantidade, categoria, estoque e saldo. Valores enviados pelo jogador não determinam o débito.
 
-Catálogos podem ser exportados/importados em JSON. A importação substitui o catálogo do rascunho, conserva o histórico da máquina e exige salvar.
+O Banco de Mana reserva o valor, e a máquina grava estoque e recibo juntos na região. Em seguida, o banco conclui o débito. Uma compra paga gera **uma mensagem pública do banco**, somente com alteração e valores antes/depois, além do aviso financeiro já existente. Não é enviada uma segunda mensagem de compra. Produtos gratuitos não geram mensagem financeira.
 
-Cada máquina guarda até 2000 recibos, exibindo os últimos 100. **Exportar e arquivar** baixa o histórico em JSON e limpa os registros da máquina, liberando novas retiradas. Guarde o arquivo exportado. O histórico fica nas flags da região: a filtragem “Minhas retiradas” organiza a interface e não constitui armazenamento secreto contra inspeção dos documentos.
+Banco e região são documentos separados. Se a conexão interromper a confirmação, a reserva e o produto escolhido permanecem registrados para recuperação pelo mesmo ID. Isso evita uma nova cobrança ou novo sorteio ao recuperar. A recuperação de compras pendentes precede novos gastos do banco; alterações na máquina ficam bloqueadas enquanto a compra dela está pendente. Mantenha ambos os módulos ativos e um mestre conectado até concluir. Uma validação definitiva anterior à entrega restitui a reserva; falhas ambíguas de gravação são recuperadas.
 
-É necessário um mestre conectado e permissão de criar mensagens de chat. Solicitações e confirmações são mensagens privadas entre solicitante e mestre responsável, dispensando socketlib. Se a confirmação não chegar, confira o histórico antes de repetir: não há reenvio automático. Mantenha um mestre estável durante as operações; mudanças de autoridade durante operações em andamento ainda exigem validação em ambiente real.
+Pedidos concorrentes passam pela autoridade do banco e pela fila da máquina. Revisões rejeitam pedidos obsoletos; estoque insuficiente, saldo insuficiente ou preço alterado não confirmam a compra. Em um pedido recusado, confira o valor atual e tente novamente.
 
-## Instalar ou atualizar no Windows
+Cada máquina armazena até 2000 recibos e exibe os últimos 100. **Exportar e arquivar**, exclusivo do mestre, baixa o histórico e libera espaço. Esses dados ficam nas flags da região; a filtragem da interface não torna documentos secretos. Operações administrativas usam mensagens privadas nativas entre mestre solicitante e mestre responsável, sem socketlib. Compras usam o transporte autenticado por documentos User do banco.
 
-1. Feche o Foundry.
-2. Baixe `Instalar-Maquina-de-Lanches.ps1` e execute no PowerShell. Se necessário, abra o PowerShell na pasta do arquivo e use:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\Instalar-Maquina-de-Lanches.ps1
-```
-
-3. Selecione a pasta **Data** do Foundry, que contém `modules`, `worlds` e `systems`.
-4. O instalador grava os arquivos em `Data/modules/holosuite-vending`. Se já existir uma instalação, primeiro faz uma cópia em `Data/module-backups` e depois atualiza os arquivos. As máquinas e estoques ficam nos dados do mundo e não são alterados pelo instalador.
-5. Abra o Foundry 13 e ative **Máquina de Lanches** em Gerenciar módulos.
-
-O instalador é local, sem downloads, sem administrador e sem alterar permanentemente a política do PowerShell. Seu payload foi verificado contra os arquivos-fonte; a execução do PowerShell no Windows ainda precisa de validação real.
-
-Para instalação manual, extraia a pasta `holosuite-vending` do arquivo `maquina-de-lanches-source.tar.gz` para `Data/modules`. O ID técnico original é preservado para manter compatibilidade e dados da primeira versão. Não há registro de aplicativos no HoloSuite nem dependência dele. Depois de atualizar, recarregue a página com F5 para remover os registros antigos da sessão.
-
-## Prévia
-
-Gere as prévias com `python3 docs/build-preview.py`. Abra `Gerenciamento-Mestre-Preview.html` para ver a janela do mestre ou `Maquina-de-Lanches-Preview.html` para a máquina dos jogadores. A prévia é autocontida, usa o motor de estoque e a classe de interface reais, e permite alternar entre mestre/jogador, simular presença na área e conexão do mestre, comprar, sortear, configurar e desenhar uma área em um mapa de exemplo.
-
-O mapa da prévia simula o canvas; no Foundry o módulo utiliza as ferramentas nativas de Regiões. Os dados da prévia ficam apenas no navegador. No cabeçalho, “Testar 200 produtos” ativa um catálogo grande para experimentar quantidades e navegação. Ela não é validação em Foundry real.
-
-## API e desenvolvimento
-
-```javascript
-const vending = game.modules.get("holosuite-vending").api;
-await vending.open();
-await vending.openEditor(); // somente mestre
-vending.drawArea("polygon"); // somente mestre, desenho no mapa
-vending.drawArea("rectangle");
-await vending.open({regionId: "ID_DA_REGIAO"});
-```
-
-Também há `getMachine(region)`, `attach(region)` e `createArea(scene,bounds,config)` para uso programático. JavaScript ES Modules, ApplicationV2, CSS isolado. Sem dependências de runtime e sem compilação para instalar.
+## Prévia e desenvolvimento
 
 ```bash
 npm test
 npm run check
 python3 docs/build-preview.py
-python3 docs/build-deliverables.py
+python3 docs/build-release.py
+npm install --no-save --package-lock=false playwright
+npx playwright install chromium
+node docs/test-preview.mjs
+node docs/test-manager.mjs
+node docs/test-scale-motion.mjs
+node docs/test-random-category.mjs
+BANK_SOURCE=/caminho/holosuite-mana node docs/test-foundry-integration.mjs
 ```
 
-Para os testes de interface, instale Playwright (`npm install --no-save playwright`), seu Chromium (`npx playwright install chromium`) e rode `node docs/test-preview.mjs`  , `node docs/test-manager.mjs` e `node docs/test-scale-motion.mjs` e `node docs/test-random-category.mjs` e `node docs/test-foundry-integration.mjs`. `HV_CHROMIUM_PATH` permite usar um Chromium já instalado.
+Use o código do Banco de Mana **v2.3.0** para a integração; por padrão, o teste procura o diretório irmão `holosuite-mana`. O workflow obtém essa tag antes do teste. `HV_CHROMIUM_PATH` aceita um Chromium instalado.
 
-## Validação
+`Maquina-de-Lanches-Preview.html` e `Gerenciamento-Mestre-Preview.html` demonstram a interface com dados fictícios. São arquivos autocontidos gerados localmente; não alteram o mundo. A integração com saldo real é exercitada pelo teste com três clientes e código dos dois módulos.
 
-- **50 testes Node:** catálogo, sorteio, estoque, idempotência, revisão, permissões, origem da identidade, pausa, posição, falhas de persistência/confirmação, demarcação nativa e cancelamento.
-- **68 cenários Chromium da interface (29 da máquina, 18 do gerenciamento, 13 de escala e 8 de sorteio):** vitrine sem molas, seleção por clique/código, código inválido, quantidade, entrega sem animação, cliques repetidos, recolher sem novo desconto, sorteio, filtros, edição/conflito, reposição, paginação, temas, fechar durante solicitação, redução de movimento, estoque independente, desenho por pontos/retângulo e cancelamento.
-- **13 cenários Chromium de integração:** importam o ponto de entrada ES real com contratos simulados do Foundry 13 (ApplicationV2 com propriedades somente leitura, grupos de controle e camadas). Cobrem abertura pelos botões, retirada pelo serviço, clique/teclado/botão direito no marcador, pan/zoom, alternância de visibilidade, desenho, cancelamento e permissões.
-- Os testes de concorrência liberam exatamente uma unidade para 200 tentativas simultâneas no motor e para 100 no serviço com documentos simulados.
-- Testes adicionais cobrem enquadramento persistente, links e páginas com imagem, cancelamento durante upload, paletas e HEX, geometria com furos, assinatura de área, gravação atômica de catálogo/área e limpeza do desenho temporário.
-- Telas de máquina, produtos, cores, recorte, área e entrega foram inspecionadas visualmente. Sem exceções JavaScript nos cenários testados.
+Validação: **46 testes Node**, **68 cenários Chromium de interface** e **13 cenários de integração** com três clientes independentes. Inclui desenho nativo, ausência da aba e dos marcadores antigos, duplo clique sem token, pan/zoom, preço adulterado, saldo insuficiente, disputa pela última unidade, falha de gravação, resposta perdida e recuperação de sorteio sem novo débito.
 
-**Pendências reais:** instalação em Foundry 13/Windows, geometrias e elevação do canvas real, FilePicker, marcadores DOM sobre o canvas, chat privado com vários clientes e desconexão/troca de mestre durante operações. O repositório público é `STR4DZN/maquina-de-lanches`. A instalação pela URL depende dos assets da release, gerados pelo workflow após validação. Não há campo `verified` sem teste real. Integração monetária permanece adiada.
+A sessão licenciada de Foundry 13 ainda precisa de validação: canvas/elevação reais, permissões, FilePicker e instalação. O manifesto não declara `verified`. JavaScript ES Modules, ApplicationV2, CSS isolado e APIs nativas, sem compilação para instalar.
 
-## Publicação no GitHub
+## API
 
-Repositório público: [STR4DZN/maquina-de-lanches](https://github.com/STR4DZN/maquina-de-lanches).
+```javascript
+const vending = game.modules.get('holosuite-vending').api;
+await vending.open({regionId: 'ID_DA_REGIAO'});
+await vending.openEditor({regionId: 'ID_DA_REGIAO'}); // mestre
+vending.drawArea('rectangle'); // mestre
+vending.drawArea('polygon');
+```
 
-Manifesto de instalação/atualização para Foundry 13: `https://github.com/STR4DZN/maquina-de-lanches/releases/latest/download/module.json`. Em Configuração → Módulos → Instalar módulo, cole a URL no campo URL do Manifesto. O download é fixo por versão.
+Também existem `getMachine(region)`, `attach(region)`, `createArea(scene,bounds,config)` e `redrawArea(region,tool)`. O serviço registra a integração quando o banco está disponível, inclusive pelo hook `mana-bank.ready`.
 
-- `module.json` usa manifesto de atualização em `releases/latest/download/module.json` e download fixo da versão em `releases/download/v0.4.2/module.zip`.
-- `python3 docs/build-release.py` cria `dist/module.zip`, `dist/module.json`, notas e checksums. O ZIP é o formato usado pelo Foundry para instalação automática.
-- O workflow de release roda os testes e publica tag/asset quando `module.json` é enviado à branch `main` com uma versão inédita. Também pode ser iniciado manualmente em Actions. Releases existentes são preservadas.
-- Para versões futuras, atualize versão, download e changelog antes de enviar à main. O builder ajusta URLs para o repositório do workflow.
-- O pacote instala somente scripts, estilos, manifesto, licença e documentação, sem testes, prévias ou dependências de desenvolvimento.
+## Publicação
+
+[Repositório STR4DZN/maquina-de-lanches](https://github.com/STR4DZN/maquina-de-lanches). O workflow valida e publica tag e release para versões inéditas de `module.json`. O manifesto de atualização usa `releases/latest/download/module.json`; o ZIP é fixo por versão. O pacote contém manifesto, scripts, estilos, licença e documentação, sem testes ou dependências de desenvolvimento.

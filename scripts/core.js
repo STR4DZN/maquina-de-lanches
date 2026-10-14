@@ -42,7 +42,7 @@ export function product(raw) {
   const capacity = number(raw.capacity, "Capacidade", {integer:true});
   const stock = number(raw.stock, "Estoque", {max:capacity, integer:true});
   return {id, name, img:imageSource(raw.img), imageFit:imageFit(raw.imageFit), category:text(raw.category, 40) || "Outros", description:text(raw.description, 1200),
-    price:number(raw.price, "Preço"), stock, capacity, weight:number(raw.weight ?? 1, "Peso do sorteio", {max:10000}), enabled:raw.enabled !== false};
+    price:number(raw.price, "Preço",{integer:true}), stock, capacity, weight:number(raw.weight ?? 1, "Peso do sorteio", {max:10000}), enabled:raw.enabled !== false};
 }
 export function currencyLabel(value) {const label=text(value,24);return !label||/^cr$/i.test(label)?"mana":label;}
 export function randomUnit() {
@@ -59,7 +59,7 @@ export function machine(raw) {
   const bodyColor = color(raw.color);
   ensure(["uniform", "weighted", "stock"].includes(raw.randomMode ?? "uniform"), "Tipo de sorteio inválido.");
   return {schema:VERSION, name, subtitle:text(raw.subtitle,160), img:imageSource(raw.img), color:bodyColor, appearance:appearance(raw.appearance), enabled:raw.enabled !== false,
-    randomEnabled:raw.randomEnabled !== false, randomMode:raw.randomMode ?? "uniform", randomPrice:number(raw.randomPrice ?? 0, "Preço do sorteio"),
+    randomEnabled:raw.randomEnabled !== false, randomMode:raw.randomMode ?? "uniform", randomPrice:number(raw.randomPrice ?? 0, "Preço do sorteio",{integer:true}),
     priceLabel:currencyLabel(raw.priceLabel), maxPerRequest:number(raw.maxPerRequest ?? 5,"Limite por retirada",{min:1,max:100,integer:true}),
     products, revision:0, history:[]};
 }

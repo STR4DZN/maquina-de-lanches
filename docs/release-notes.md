@@ -1,17 +1,17 @@
-Máquina de Lanches 0.4.2 para Foundry VTT 13.
+Máquina de Lanches 0.5.0 · Foundry VTT 13.
 
-- Corrige as janelas que não abriam por conflito com `ApplicationV2.state`, propriedade somente leitura.
-- Remove a integração e a dependência opcional do HoloSuite.
-- Grupo próprio **Máquinas de vendas** (ícone de loja) nos controles do mapa, separado de Tokens e Regiões.
-- Botões para usar, gerenciar, desenhar polígono/retângulo e mostrar/ocultar marcadores.
-- Marcadores legíveis com o nome da máquina: clique ou teclado para usar; botão direito do mestre para gerenciar.
-- Marcadores acompanham pan/zoom e respeitam a presença do token dos jogadores.
-- Ao concluir a demarcação, volta à camada de máquinas e abre a configuração.
-- Preserva as máquinas, catálogos, estoques, mana e sorteio por categoria existentes.
-- 50 testes Node, 68 cenários de interface e 13 de integração Chromium com o ponto de entrada ES real.
+- Área com contorno simples, sem ícone ou nome sobre o mapa.
+- Duplo clique na área abre a máquina para jogadores, sem exigir token.
+- Remove o grupo/aba próprio de máquinas; criação e configuração ficam nas ferramentas nativas de Regiões.
+- Ao desenhar, vincula a máquina e abre o gerenciamento. Shift + duplo clique abre o editor para o mestre.
+- Compras descontam do saldo compartilhado do Banco de Mana 2.3.0 ou posterior.
+- Preço, estoque, categoria e saldo validados pelo mestre responsável; uma mensagem financeira por compra paga.
+- Reserva persistente e recuperação pelo mesmo ID, sem nova cobrança ou novo sorteio após falhas.
+- Mantém produtos, estoques, cores, imagens, quantidades, seleção e sorteio por categoria existentes.
+- 46 testes Node, 68 cenários de interface e 12 de integração Chromium com três clientes e os dois módulos reais sob contratos simulados.
 
-**Após atualizar, recarregue a página com F5** para limpar os registros antigos da sessão. O ID técnico é preservado para manter os dados existentes.
+Atualize também o Banco de Mana para 2.3.0. Ative ambos e recarregue todos os clientes com F5.
 
-Instalação: use o asset module.json desta release como URL do Manifesto em Instalar Módulo. O manifesto baixa module.zip da mesma versão.
+Como criar: Regiões → Criar máquina de vendas (retângulo ou polígono) → desenhar → configurar e salvar. O jogador dá duplo clique na área e compra.
 
-Preços informativos. Testes usam contratos/documentos simulados e Chromium; validação em uma sessão real do Foundry permanece necessária.
+Sem dependências obrigatórias no manifesto. Sem banco compatível, a máquina abre com compras bloqueadas. Validação em sessão licenciada real ainda necessária.

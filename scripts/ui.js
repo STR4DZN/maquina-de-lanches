@@ -30,7 +30,7 @@ export class VendingApp extends foundry.applications.api.ApplicationV2 {
     if(m&&!this.manager){this.vmState.page=catalogPage(m,this.vmState).page;}
     if(m && !m.products.some(p=>p.id===this.vmState.selectedId && p.enabled)) this.vmState.selectedId=null;
     const context={...this.vmState,isGM:game.user.isGM,userId:game.user.id,theme:game.settings.get(ID,"theme"),gridSize:this.region?.parent.grid.size,
-      gmOnline:!!activeGM()?.active,tokens,liveMachine:m,stale:this.vmState.editing && this.vmState.draft.revision!==m?.revision,
+      bankReady:!!game.modules?.get('holosuite-mana')?.api?.purchase,bankBalance:game.modules?.get('holosuite-mana')?.api?.getBalance?.()??0,canUse:true,gmOnline:!!activeGM()?.active,tokens,liveMachine:m,stale:this.vmState.editing && this.vmState.draft.revision!==m?.revision,
       machines:regions.map(r=>({id:r.id,machine:getMachine(r)}))};
     return this.manager?renderManager(context):renderView(context);
   }
@@ -125,7 +125,7 @@ export class VendingApp extends foundry.applications.api.ApplicationV2 {
       if(!await this.canLeave())return;
       this.switchMachine(id);
     } else if(action==="theme") await game.settings.set(ID,"theme",game.settings.get(ID,"theme")==="dark"?"light":"dark");
-    else if(action==="product") {this.vmState.selectedId=id;this.vmState.quantity=1;this.vmState.codeEntry="";this.vmState.status="Produto selecionado. Clique em Retirar lanche.";}
+    else if(action==="product") {this.vmState.selectedId=id;this.vmState.quantity=1;this.vmState.codeEntry="";this.vmState.status="Produto selecionado. Clique em Comprar lanche.";}
     else if(action==="category") this.vmState.category=id;
     else if(action==="page-next") {const c=catalogPage(getMachine(this.region),this.vmState);this.vmState.page=Math.min(c.pages-1,c.page+1);}
     else if(action==="page-prev") this.vmState.page=Math.max(0,catalogPage(getMachine(this.region),this.vmState).page-1);
@@ -220,7 +220,7 @@ export class VendingApp extends foundry.applications.api.ApplicationV2 {
   }
   async release(mode) {
     ensure(!this.vmState.delivered,"Pegue o lanche no compartimento antes de retirar outro.");
-    ensure(this.vmState.tokenId,"Entre na área da máquina com seu token.");
+
     const region=this.region,quantity=mode==="random"?1:this.vmState.quantity,productId=this.vmState.selectedId,category=this.vmState.category;
     const chosen=getMachine(region).products.find(p=>p.id===productId);if(mode==="direct"){const check=quantityState(getMachine(region),chosen,quantity);ensure(check.valid,check.reason);}
     this.vmState.busy=true;this.vmState.status=mode==="random"?"Escolhendo uma surpresa para você…":"Preparando seu lanche…";this.refresh();

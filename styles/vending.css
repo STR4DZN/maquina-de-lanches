@@ -343,3 +343,5 @@
 .vm-map-marker:hover{background:#fffdf5;box-shadow:0 3px 12px #0007}
 .vm-map-marker:focus-visible{outline:3px solid #f3d075;outline-offset:3px}
 .vm-map-marker.is-offline{opacity:.65;filter:grayscale(.6)}
+
+.vm-map-areas{position:fixed;pointer-events:none;z-index:5;overflow:hidden}

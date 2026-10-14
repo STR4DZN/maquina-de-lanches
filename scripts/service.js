@@ -21,9 +21,7 @@ export function validateUser(region,user,token) {
   ensure(user?.active, "Jogador não está conectado.");
   ensure(user.isGM || !game.paused, "A sessão está pausada.");
   ensure(user.isGM || user.viewedScene === region.parent.id, "Abra a cena da máquina antes de utilizá-la.");
-  ensure(token?.actor && (!token.hidden || user.isGM), "Token indisponível.");
-  ensure(token.actor.testUserPermission(user,CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER), "Você não controla esse personagem.");
-  ensure(tokenInside(region,token), "Seu token precisa estar dentro da área da máquina.");
+  ensure(user.isGM||user.role!==0,'Jogador sem acesso à máquina.');
 }
 function receiptHTML(m,r) {
   return `<div class="hv-receipt"><strong>${escapeHTML(m.name)}</strong><p>${escapeHTML(r.tokenName)} retirou <b>${r.quantity} × ${escapeHTML(r.name)}</b>${r.mode==="random"?" pelo sorteio":""}.</p></div>`;
@@ -49,7 +47,7 @@ export class VendingService {
       else if(result?.ok && pending.action!=="dispense") this.finish(message.id,null,result.value);
       else this.checkReceipts();
     });
-    for(const hook of ["createRegion","updateRegion","deleteRegion","updateToken","createToken","deleteToken","canvasReady","pauseGame","userConnected"]) {
+    for(const hook of ["createRegion","updateRegion","deleteRegion","updateToken","createToken","deleteToken","canvasReady","pauseGame","userConnected","updateSetting"]) {
       Hooks.on(hook,()=>{ this.checkReceipts(); this.changed(); });
     }
   }
@@ -66,6 +64,11 @@ export class VendingService {
     error ? p.reject(error) : p.resolve(result);
   }
   async request(region,payload) {
+    if(payload.action==='dispense'){
+      const bank=game.modules?.get('holosuite-mana')?.api;ensure(bank?.purchase,'Ative e atualize o Banco de Mana para comprar.');
+      const m=getMachine(region),quote=payload.mode==='random'?m.randomPrice:(m.products.find(p=>p.id===payload.productId)?.price??NaN)*Number(payload.quantity);
+      return bank.purchase({...payload,provider:ID,sceneId:region.parent.id,regionId:region.id,quote});
+    }
     const gm=activeGM(); ensure(gm?.active, "É necessário um mestre conectado para usar a máquina.");
     ensure(region?.parent && getMachine(region), "Máquina não encontrada.");
     const request={...payload,version:1,sceneId:region.parent.id,regionId:region.id,authorityId:gm.id};
@@ -91,17 +94,8 @@ export class VendingService {
       let current=getMachine(region);
       ensure(current?.schema===1,"Máquina inexistente ou versão de dados incompatível.");
       ensure(JSON.stringify(request).length <= 1000000,"Solicitação muito grande.");
-      if(request.action==="dispense") {
-        const token=scene.tokens.get(request.tokenId);
-        validateUser(region,user,token);
-        const output=dispense(current,{...request,id:message.id},{userId,actorId:token.actor.id,actorUuid:token.actor.uuid,tokenName:token.name});
-        if(!output.duplicate) await region.update({[`flags.${ID}.machine`]:output.state});
-        current=output.state;
-        result={ok:true,value:output.receipt};
-        try { await message.update({content:receiptHTML(current,output.receipt),[`flags.${ID}.result`]:result}); }
-        catch(error) { console.warn(`${ID}: estoque e recibo salvos; mensagem não atualizada.`,error); }
-        return output.receipt;
-      }
+      ensure(request.action!=='dispense','Atualize a máquina e compre pelo Banco de Mana.');
+      ensure(!game.modules?.get('holosuite-mana')?.api?.hasPendingPurchase?.(ID,scene.id,region.id),'Há uma compra em confirmação nesta máquina. Aguarde antes de editar.');
       assertGM(user);
       if(request.action==="area") {
         ensure(request.signature===geometrySignature(geometryOf(region)),"A área mudou enquanto você editava. Confira o desenho atual antes de aplicar.");

@@ -7,3 +7,6 @@ test-results/
 
 Maquina-de-Lanches-Preview.html
 Gerenciamento-Mestre-Preview.html
+
+qa-*.png
+.integration/

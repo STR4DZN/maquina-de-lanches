@@ -34,7 +34,7 @@ function previewRegion(id,m,geometry={shapes:[{type:'rectangle',x:100,y:100,widt
     toObject(){return {shapes:structuredClone(this.shapes),elevation:structuredClone(this.elevation)};},
     async update(data){if(data[`flags.${ID}.machine`]){m=structuredClone(data[`flags.${ID}.machine`]);this.state=m;}if(data.name)this.name=data.name;if(data.shapes)this.shapes=structuredClone(data.shapes);if(data.elevation)this.elevation=structuredClone(data.elevation);persist();previewService.changed();},
     async delete(){scene.regions.delete(this.id);persist();previewService.changed();},
-    testPoint:()=>document.getElementById('preview-inside').checked,sheet:{render:()=>alert('No Foundry, este botão abre o editor nativo da região no mapa.')}};
+    testPoint:()=>true,sheet:{render:()=>alert('No Foundry, este botão abre o editor nativo da região no mapa.')}};
   region.object={control(){canvas.regions.controlled=[{document:region}];}};return region;
 }
 let initial;
@@ -43,7 +43,8 @@ if(!initial)initial=[{id:"orbit",m:starterMachine()},{id:"dock",m:{...starterMac
 for(const item of initial)scene.regions.set(item.id,previewRegion(item.id,item.m,item.geometry));
 function persist(){try{localStorage.setItem("vm-preview-machines-v2",JSON.stringify([...scene.regions].map(r=>({id:r.id,m:r.getFlag(ID,"machine"),geometry:r.toObject()}))));}catch{}}
 scene.createEmbeddedDocuments=async(type,items)=>items.map(item=>{const region=previewRegion(crypto.randomUUID(),item.flags[ID].machine,{shapes:item.shapes,elevation:item.elevation});scene.regions.set(region.id,region);persist();return region;});
-globalThis.game={user:gm,users,scenes:new PreviewCollection([[scene.id,scene]]),paused:false,settings:{get:()=>localStorage.getItem("vm-preview-theme-v2")||"light",set:async(id,key,value)=>{localStorage.setItem("vm-preview-theme-v2",value);}}};
+let previewBalance=1000000;
+globalThis.game={user:gm,users,scenes:new PreviewCollection([[scene.id,scene]]),paused:false,modules:new Map([['holosuite-mana',{api:{purchase:()=>{},getBalance:()=>previewBalance}}]]),settings:{get:()=>localStorage.getItem("vm-preview-theme-v2")||"light",set:async(id,key,value)=>{localStorage.setItem("vm-preview-theme-v2",value);}}};
 globalThis.canvas={scene,animatePan:async view=>{globalThis.lastPreviewPan=view;ui.notifications.info("Área localizada no mapa de exemplo.");},tokens:{controlled:[{document:token}]},regions:{controlled:[],releaseAll(){this.controlled=[];},activate(options){if(options?.tool)showMapDrawing(options.tool);}},ready:true};
 globalThis.ui={notifications:{warn:message=>{document.getElementById("preview-notice").textContent=message;},info:message=>{document.getElementById("preview-notice").textContent=message;}}};
 const previewService=new VendingService();
@@ -51,9 +52,10 @@ previewService.request=(region,payload)=>{
   const user=game.user;
   return previewService.queue.run(region.id,async()=>{
     ensure(document.getElementById("preview-online").checked,"É necessário um mestre conectado para usar a máquina.");
-    const current=getMachine(region);let next,result,areaChange={};
+    const current=getMachine(region);let next,result,areaChange={},cost=0;
     if(payload.action==="dispense"){
-      validateUser(region,user,scene.tokens.get(payload.tokenId));
+      validateUser(region,user);
+      cost=payload.mode==='random'?current.randomPrice:(current.products.find(p=>p.id===payload.productId)?.price??NaN)*Number(payload.quantity);ensure(Number.isSafeInteger(cost)&&cost>=0,"Configure preços inteiros em mana.");ensure(cost<=previewBalance,"Saldo de mana insuficiente.");
       const output=dispense(current,{...payload,id:crypto.randomUUID()},{userId:user.id,actorId:actor.id,actorUuid:actor.uuid,tokenName:token.name});next=output.state;result=output.receipt;
     }else{
       assertGM(user);
@@ -69,7 +71,7 @@ previewService.request=(region,payload)=>{
       else if(payload.action==="archive"){ensure(payload.revision===current.revision,"A máquina mudou.");next=structuredClone(current);next.history=[];next.revision++;}
       result={revision:next.revision};
     }
-    await region.update({...areaChange,[`flags.${ID}.machine`]:next});return result;
+    await region.update({...areaChange,[`flags.${ID}.machine`]:next});previewBalance-=cost;previewService.changed();return result;
   });
 };
 const previewStore=new VendingApp(previewService),previewManager=new VendingManager(previewService);let previewApp=PREVIEW_MANAGER?previewManager:previewStore;
@@ -115,7 +117,6 @@ function showMapDrawing(initialTool='polygon'){
 }
 await previewApp.render();
 document.getElementById("preview-role").onchange=async event=>{if(!await previewApp.canLeave()){event.target.value=game.user.isGM?"gm":"player";return;}game.user=event.target.value==="gm"?gm:player;document.getElementById("preview-scale").disabled=!game.user.isGM;if(!game.user.isGM){previewManager.vmState.dirty=false;previewManager.vmState.areaDirty=false;await activatePreview("store");}else await previewApp.render();};
-document.getElementById("preview-inside").onchange=()=>previewApp.refresh();
 document.getElementById("preview-online").onchange=event=>{gm.active=event.target.checked;previewApp.refresh();};
 document.getElementById("preview-open").onclick=()=>previewApp.render();
 document.getElementById("preview-close").onclick=()=>previewApp.close();
